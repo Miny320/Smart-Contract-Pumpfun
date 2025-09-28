@@ -37,7 +37,9 @@ pub struct InitializeCurveConfiguration<'info> {
 
     /// CHECK
     #[account(
-        mut,
+        init,
+        space = 8,
+        payer = admin,
         seeds = [b"global"],
         bump,
     )]

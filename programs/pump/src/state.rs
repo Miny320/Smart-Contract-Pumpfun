@@ -33,7 +33,7 @@ pub struct LiquidityProvider {
 }
 
 impl LiquidityProvider {
-    pub const SEED_PREFIX: &'static str = "LiqudityProvider"; // Prefix for generating PDAs
+    pub const SEED_PREFIX: &'static str = "LiquidityProvider"; // Prefix for generating PDAs
 
     // Discriminator (8) + f64 (8)
     pub const ACCOUNT_SIZE: usize = 8 + 8;
@@ -83,7 +83,7 @@ pub trait LiquidityPoolAccount<'info> {
     fn grant_shares(
         &mut self,
         liquidity_provider_account: &mut Account<'info, LiquidityProvider>,
-        hares: u64,
+        shares: u64,
     ) -> Result<()>;
 
     // Removes a specific number of shares from a liquidity provider's account

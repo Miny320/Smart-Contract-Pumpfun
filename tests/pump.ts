@@ -13,7 +13,7 @@ import { ASSOCIATED_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@coral-xyz/anchor/dist/
 const connection = new Connection("http://localhost:8899")
 const curveSeed = "CurveConfiguration"
 const POOL_SEED_PREFIX = "liquidity_pool"
-const LP_SEED_PREFIX = "LiqudityProvider"
+const LP_SEED_PREFIX = "LiquidityProvider"
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -37,8 +37,8 @@ describe("pump", () => {
   let mint1: PublicKey
   let tokenAta1: PublicKey
 
-  // let mint2: PublicKey
-  // let tokenAta2: PublicKey
+  let mint2: PublicKey
+  let tokenAta2: PublicKey
 
   console.log("Admin's wallet address is : ", user.publicKey.toBase58())
 
@@ -62,7 +62,7 @@ describe("pump", () => {
 
   it("Airdrop to user wallet", async () => {
     console.log("Created a user, address is ", user2.publicKey.toBase58())
-    console.log(`Requesting airdrop for another user ${user.publicKey.toBase58()}`)
+    console.log(`Requesting airdrop for another user ${user2.publicKey.toBase58()}`)
     // 1 - Request Airdrop
     const signature = await connection.requestAirdrop(
       user2.publicKey,
@@ -76,7 +76,7 @@ describe("pump", () => {
       lastValidBlockHeight,
       signature
     }, 'finalized');
-    console.log("user balance : ", (await connection.getBalance(user.publicKey)) / 10 ** 9, "SOL")
+    console.log("user balance : ", (await connection.getBalance(user2.publicKey)) / 10 ** 9, "SOL")
   })
 
   it("Mint token1 to user wallet", async () => {
@@ -134,6 +134,7 @@ describe("pump", () => {
             .initialize(1)
             .accounts({
               dexConfigurationAccount: curveConfig,
+              globalAccount: PublicKey.findProgramAddressSync([Buffer.from("global")], program.programId)[0],
               admin: user.publicKey,
               rent: SYSVAR_RENT_PUBKEY,
               systemProgram: SystemProgram.programId
@@ -234,15 +235,16 @@ describe("pump", () => {
             .addLiquidity(new BN(1000000000000000), new BN(30000000000))
             .accounts({
               pool: poolPda,
+              globalAccount: PublicKey.findProgramAddressSync([Buffer.from("global")], program.programId)[0],
+              liquidityProviderAccount: liquidityProviderAccount,
               mintTokenOne: mint1,
               poolTokenAccountOne: poolTokenOne,
               userTokenAccountOne: userAta1,
-              liquidityProviderAccount: liquidityProviderAccount,
               user: user.publicKey,
-              tokenProgram: TOKEN_PROGRAM_ID,
-              associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
               rent: SYSVAR_RENT_PUBKEY,
-              systemProgram: SystemProgram.programId
+              systemProgram: SystemProgram.programId,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              associatedTokenProgram: ASSOCIATED_PROGRAM_ID
             })
             .instruction()
         )
@@ -297,16 +299,17 @@ describe("pump", () => {
           await program.methods
             .swap(new BN(200000000), new BN(2))
             .accounts({
+              dexConfigurationAccount: curveConfig,
               pool: poolPda,
+              globalAccount: PublicKey.findProgramAddressSync([Buffer.from("global")], program.programId)[0],
               mintTokenOne: mint1,
               poolTokenAccountOne: poolTokenOne,
               userTokenAccountOne: userAta1,
-              dexConfigurationAccount: curveConfig,
               user: user.publicKey,
-              tokenProgram: TOKEN_PROGRAM_ID,
-              associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
               rent: SYSVAR_RENT_PUBKEY,
-              systemProgram: SystemProgram.programId
+              systemProgram: SystemProgram.programId,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              associatedTokenProgram: ASSOCIATED_PROGRAM_ID
             })
             .instruction()
         )
